@@ -11,7 +11,7 @@ class Matches extends Model
 
     // Table name is optional if it matches Laravel convention ("matches")
     // protected $table = 'matches';
-
+    protected $primaryKey = 'match_id';
     protected $fillable = [
         'home_team_id',
         'away_team_id',
