@@ -26,7 +26,7 @@ return new class extends Migration
             $table->smallInteger('points')->default(0);
             $table->smallInteger('home_wins')->default(0);
             $table->smallInteger('away_wins')->default(0);
-            $table->enum('streak_type',['Winning,Losing,None'])->default('None');
+            $table->enum('streak_type',['Winning','Losing','None'])->default('None');
             $table->smallInteger('streak_count',unsigned:true)->default(0);
             $table->unsignedBigInteger('next_match_id')->nullable();
             $table->dateTime('last_updated')->default(DB::raw('CURRENT_TIMESTAMP')) ->useCurrentOnUpdate();

@@ -43,4 +43,41 @@ class Teams extends Model
     {
         return $this->hasMany(Matches::class, 'away_team_id');
     }
+
+    public function players()
+    {
+        return $this->belongsToMany(Players::class, 'team_lineup', 'player_id', 'team_id')
+                    ->using(Team_LineUp::class) // custom pivot model
+                    ->withPivot([
+                        'match_id',
+                        'status',
+                        'score',
+                        'yellow_card',
+                        'red_card',
+                        'created_at',
+                        'updated_at'
+                    ]);
+    }
+
+    public function playedLeagues()
+    {
+        return $this->belongsToMany(Leagues::class, 'league_position', 'league_id', 'team_id')
+                    ->using(league_position::class) // custom pivot model
+                    ->withPivot([
+                        'team_position',
+                        'played_matches',
+                        'wins',
+                        'losses',
+                        'draws',
+                        'goal_given',
+                        'goal_achieved',
+                        'points',
+                        'home_wins',
+                        'away_wins',
+                        'streak_type',
+                        'streak_count',
+                        'next_match_id',
+                        'last_updated',
+                    ]);
+    }
 }

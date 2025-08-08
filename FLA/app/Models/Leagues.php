@@ -39,4 +39,26 @@ class Leagues extends Model
     {
         return $this->hasMany(Matches::class, 'league_id');
     }
+
+    public function getTeams()
+    {
+        return $this->belongsToMany(Teams::class, 'league_position', 'league_id', 'team_id')
+                    ->using(league_position::class) // custom pivot model
+                    ->withPivot([
+                        'team_position',
+                        'played_matches',
+                        'wins',
+                        'losses',
+                        'draws',
+                        'goal_given',
+                        'goal_achieved',
+                        'points',
+                        'home_wins',
+                        'away_wins',
+                        'streak_type',
+                        'streak_count',
+                        'next_match_id',
+                        'last_updated',
+                    ]);
+    }
 }
