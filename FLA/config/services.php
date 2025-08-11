@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'football_api' => [
+        'base_url' => env('API_BASE_URL'),
+        'key'      => env('API_KEY'),
+        'host'     => env('API_HOST'),
+    ],
+
+
 ];

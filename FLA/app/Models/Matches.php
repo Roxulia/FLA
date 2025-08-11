@@ -20,6 +20,7 @@ class Matches extends Model
         'score',
         'status',
         'league_id',
+        'id_from_api'
     ];
 
     protected $casts = [

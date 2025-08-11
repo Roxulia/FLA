@@ -26,6 +26,7 @@ class Teams extends Model
         'logo',
         'is_national',
         'is_active',
+        'id_from_api',
     ];
 
     protected $cast = [

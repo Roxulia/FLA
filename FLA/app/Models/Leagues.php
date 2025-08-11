@@ -27,6 +27,7 @@ class Leagues extends Model
         'current_season',
         'logo',
         'is_active',
+        'id_from_api'
     ];
 
     protected $casts = [

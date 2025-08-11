@@ -14,7 +14,8 @@ class Players extends Model
     protected $fillables = [
         'player_name',
         'player_position',
-        'jersey_number'
+        'jersey_number',
+        'id_from_api'
     ];
 
     protected $casts = [
