@@ -24,7 +24,7 @@ return new class extends Migration
             $table->enum('status', ['scheduled', 'live', 'finished', 'postponed', 'cancelled']);
 
             $table->unsignedBigInteger('league_id');
-
+            $table->unsignedBigInteger('id_from_api')->nullable();
             $table->timestamps();
 
             // Foreign Keys

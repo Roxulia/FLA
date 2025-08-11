@@ -27,7 +27,7 @@ return new class extends Migration
             $table->integer('current_season')->nullable();
             $table->string('logo', 255)->nullable();
             $table->boolean('is_active')->default(true);
-
+            $table->unsignedBigInteger('id_from_api')->nullable();
             $table->timestamps(); // created_at and updated_at
         });
     }

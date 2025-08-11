@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('player_name',50);
             $table->enum('player_position',['Back','Mid','Front','Goal'])->nullable();
             $table->smallInteger('jersey_number')->nullable();
+            $table->unsignedBigInteger('id_from_api')->nullable();
             $table->timestamps();
         });
     }

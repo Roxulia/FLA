@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('logo', 255)->nullable();
             $table->boolean('is_national')->default(true);
             $table->boolean('is_active')->default(true);
-
+            $table->unsignedBigInteger('id_from_api')->nullable();
             $table->timestamps(); // created_at and updated_at
         });
     }
