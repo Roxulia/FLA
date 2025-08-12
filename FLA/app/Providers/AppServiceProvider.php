@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repository\leagueRepo;
+use App\Repository\teamRepo;
 use Illuminate\Support\ServiceProvider;
 use App\Services\ApiFetcher;
 
@@ -19,6 +21,12 @@ class AppServiceProvider extends ServiceProvider
                 $config['key'],
                 $config['host']
             );
+        });
+        $this->app->singleton(leagueRepo::class,function ($app){
+            return new leagueRepo();
+        });
+        $this->app->singleton(teamRepo::class,function ($app){
+            return new teamRepo();
         });
     }
 
