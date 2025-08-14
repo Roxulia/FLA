@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\league_position;
 use Illuminate\Support\Facades\Http;
 use App\Models\Leagues;
+use App\Models\Matches;
 use App\Models\Players;
 use App\Models\Teams;
 use App\Repository\leagueRepo;
@@ -72,10 +74,26 @@ class ApiFetcher
             throw new \Exception('Failed to fetch players.');
         }
         $json = $response->json(); // Decode response to array
-        $players = $json['response']['players'] ?? []; // Safely get leagues or empty array
+        $players = $json['response']['list']['squad'] ?? [];
 
 
         return $players;
+    }
+
+    public function fetchMatchesByDate($date)
+    {
+        $response = Http::withHeaders([
+            'x-rapidapi-host' => $this->host,
+            'x-rapidapi-key'  => $this->key,
+        ])->get("{$this->baseUrl}/football-get-matches-by-date?date={$date}");
+
+        if ($response->failed()) {
+            throw new \Exception('Failed to fetch players.');
+        }
+        $json = $response->json(); // Decode response to array
+        $matches = $json['response']['matches'] ?? [];
+
+        return $matches;
     }
 
     public function storeLeagues()
@@ -113,11 +131,11 @@ class ApiFetcher
             $data = $this->fetchTeamsByLeagueId($i);
             // Example: store data
             foreach ($data as $item) {
-                Teams::updateOrCreate(
+                $team = Teams::updateOrCreate(
 
                     [
                         'team_fullname' => $item['name'],
-                        'team_shortform'=>Null,
+                        'team_shortform'=>$item['shortName'],
                         'team_code'=>Null,
                         'country'=>Null,
                         'city'=>Null,
@@ -127,11 +145,30 @@ class ApiFetcher
                         'id_from_api'=>$item['id'],
                     ]
                 );
+                $team_id = $team->team_id;
+                $scores = explode('-',$item['scoreStr']);
+
+                league_position::Create(
+                    [
+                        'team_id' => $team_id,
+                        'league_id' =>$i,
+                        'team_position'=>$item['idx'],
+                        'played_matches'=>$item['played'],
+                        'wins'=>$item['wins'],
+                        'losses'=>$item['losses'],
+                        'draws'=>$item['draws'],
+                        'goal_given' => $scores[1],
+                        'goal_achieved'=>$scores[0],
+                        'points' => $item['pts']
+
+                    ]
+                );
             }
             $recordCount += count($data);
         }
         return $recordCount . 'Records Saved';
     }
+
 
     public function storePlayers()
     {
@@ -141,19 +178,65 @@ class ApiFetcher
         foreach($idList as $i){
             $data = $this->fetchPlayersByTeamId($i);
             // Example: store data
-            foreach ($data as $item) {
-                Players::updateOrCreate(
+            $recordLen = $this->preprocessPlayers($data);
+            $recordCount += $recordLen;
+        }
+        return $recordCount . 'Records Saved';
+    }
 
+    public function storeMatches($date)
+    {
+        $teamrepo = new teamRepo();
+        $leaguerepo = new leagueRepo();
+        $recordCount = 0;
+        $data = $this->fetchMatchesByDate($date);
+        foreach($data as $item)
+        {
+            $home_team = $teamrepo->getTeamByApiId($item['home']['id']);
+            $away_team = $teamrepo->getTeamByApiId($item['away']['id']);
+            $league = $leaguerepo->getLeagueByApiId($item['leagueId']);
+            $time = str_split($item['time'],11);
+            if(!$home_team || !$away_team || !$league){
+                continue;
+            }
+            $home_team_id = $home_team->team_id;
+            $away_team_id = $away_team->team_id;
+            $league_id = $league->league_id;
+            Matches::updateOrCreate(
+                [
+                    'home_team_id' => $home_team_id,
+                    'away_team_id' => $away_team_id,
+                    'date' => $date,
+                    'time' => $time[1],
+                    'score' => $item['status']['scoreStr'],
+                    'league_id'=>$league_id,
+                    'id_from_api'=>$item['id']
+                ]
+            );
+            $recordCount++;
+        }
+        return $recordCount . "Saved";
+    }
+
+    public function preprocessPlayers($data)
+    {
+        $recordLen = 0;
+        foreach($data as $item)
+        {
+            $members = $item['members'];
+            foreach($members as $m)
+            {
+                Players::updateOrCreate(
                     [
-                        'player_name'=>$item['name'],
-                        'player_position'=>Null,
-                        'jersey_number'=>Null,
-                        'id_from_api'=>$item['id'],
+                        'player_name' => $m['name'],
+                        'player_position' => $m['role']['fallback'],
+                        'jersey_number'=>$m['shirtNumber'],
+                        'id_from_api'=>$m['id']
                     ]
                 );
             }
-            $recordCount += count($data);
+            $recordLen += count($members);
         }
-        return $recordCount . 'Records Saved';
+        return $recordLen;
     }
 }
