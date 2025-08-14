@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('players', function (Blueprint $table) {
             $table->id('player_id');
             $table->string('player_name',50);
-            $table->enum('player_position',['Back','Mid','Front','Goal'])->nullable();
+            $table->enum('player_position',['Defender','Midfielder','Attacker','Keeper','Coach'])->nullable();
             $table->smallInteger('jersey_number')->nullable();
             $table->unsignedBigInteger('id_from_api')->nullable();
             $table->timestamps();
