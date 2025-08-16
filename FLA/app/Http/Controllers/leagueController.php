@@ -16,11 +16,15 @@ class leagueController extends Controller
 
     public function  getAllLeagues()
     {
-        return $this->league_repo->getAllLeagues();
+         return response()->json($this->league_repo->getAllLeagues());
     }
 
     public function getLeagueByApiId(int $id)
     {
-        return $this->league_repo->getLeagueByApiId($id);
+        $league = $this->league_repo->getLeagueByApiId($id);
+        if (!$league) {
+            return response()->json(['message' => 'League not found'], 404);
+        }
+        return response()->json($league);
     }
 }

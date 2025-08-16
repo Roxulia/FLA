@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\DTO\leagueDTO;
 use App\Models\Leagues;
 
 class leagueRepo
@@ -9,28 +10,95 @@ class leagueRepo
     /**
      * Create a new class instance.
      */
-    public function getLeagueById(int $id)
+    public function create(LeagueDTO $dto): LeagueDTO
     {
-        return Leagues::find($id); // SELECT * FROM leagues WHERE id = ? LIMIT 1
+        $league = Leagues::create(
+
+                [
+                    'fullname' => $dto -> fullName,
+                    'shortform'=> $dto ->shortForm,
+                    'code'=> $dto -> code,
+                    'country'=> $dto -> country,
+                    'type'=> $dto -> type,
+                    'tier'=> $dto -> tier,
+                    'season_start'=> $dto -> season_start,
+                    'season_end'=> $dto -> season_end,
+                    'current_season'=> $dto -> current_season,
+                    'logo'=> $dto -> logo,
+                    'id_from_api'=> $dto -> id_from_api
+                ]
+            );
+
+        return leagueDTO::fromModel($league);
     }
 
-    public function getAllLeagues()
+    public function update(int $id, LeagueDTO $dto): ?LeagueDTO
     {
-        return Leagues::all(); // SELECT * FROM leagues
+        $league = Leagues::find($id);
+        if (!$league) {
+            return null;
+        }
+
+        $league->update(
+                [
+                    'fullname' => $dto -> fullName,
+                    'shortform'=> $dto ->shortForm,
+                    'code'=> $dto -> code,
+                    'country'=> $dto -> country,
+                    'type'=> $dto -> type,
+                    'tier'=> $dto -> tier,
+                    'season_start'=> $dto -> season_start,
+                    'season_end'=> $dto -> season_end,
+                    'current_season'=> $dto -> current_season,
+                    'logo'=> $dto -> logo,
+                    'id_from_api'=> $dto -> id_from_api
+                ]
+            );
+
+        return leagueDTO::fromModel($league);
     }
 
-    public function getLeaguesByName(string $name)
+    public function getById(int $id): ?leagueDTO
     {
-        return Leagues::where('name', 'LIKE', "%{$name}%")->get();
+        $league = Leagues::find($id);
+        if (!$league) {
+            return null;
+        }
+
+        return leagueDTO::fromModel($league);
+    }
+    public function getAllLeagues() : array
+    {
+        return Leagues::all()->map(function ($league) {
+            return leagueDTO::fromModel($league);
+        })->toArray();
     }
 
-    public function getAllAPILeagueID()
+    public function getLeaguesByName(string $name) : ?leagueDTO
+    {
+        $league =  Leagues::where('name', 'LIKE', "%{$name}%")->get();
+        if(!$league)
+        {
+            return null;
+        }
+        else
+        {
+           return leagueDTO::fromModel($league);
+        }
+    }
+
+    public function getAllAPILeagueID() : array
     {
         return Leagues::pluck('id_from_api')->toArray();
     }
 
-    public function getLeagueByApiId(int $id)
+    public function getLeagueByApiId(int $id) : ?leagueDTO
     {
-        return Leagues::where('id_from_api','=',"{$id}") -> get();
+        $league =  Leagues::where('id_from_api','=',"{$id}") -> get();
+        if(!$league)
+        {
+            return null;
+        }
+        return leagueDTO::fromModel($league);
     }
 }
