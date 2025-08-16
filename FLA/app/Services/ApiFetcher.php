@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\leagueDTO;
 use App\Models\league_position;
 use Illuminate\Support\Facades\Http;
 use App\Models\Leagues;
@@ -20,13 +21,14 @@ class ApiFetcher
     protected $baseUrl;
     protected $key;
     protected $host;
+    protected $leaguerepo;
 
     public function __construct(string $baseUrl, string $key, string $host)
     {
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->key = $key;
         $this->host = $host;
-
+        $this->leaguerepo = new leagueRepo();
     }
 
     public function fetchLeagues()
@@ -101,22 +103,7 @@ class ApiFetcher
         $data = $this->fetchLeagues();
         // Example: store data
         foreach ($data as $item) {
-            Leagues::updateOrCreate(
-
-                [
-                    'fullname' => $item['name'],
-                    'shortform'=> Null,
-                    'code'=> Null,
-                    'country'=> Null,
-                    'type'=> Null,
-                    'tier'=> Null,
-                    'season_start'=> Null,
-                    'season_end'=> Null,
-                    'current_season'=> Null,
-                    'logo'=> $item['logo'],
-                    'id_from_api'=> $item['id']
-                ]
-            );
+            $this->leaguerepo->create(new leagueDTO(0,$item['name'],null,null,null,null,null,null,null,null,$item['logo'],$item['id']));
         }
 
         return count($data) . ' records saved.';
@@ -124,9 +111,9 @@ class ApiFetcher
 
     public function storeTeams()
     {
-        $leaguerepo = new leagueRepo();
+
         $recordCount = 0;
-        $idList = $leaguerepo->getAllAPILeagueID();
+        $idList = $this->leaguerepo->getAllAPILeagueID();
         foreach($idList as $i){
             $data = $this->fetchTeamsByLeagueId($i);
             // Example: store data
@@ -187,14 +174,13 @@ class ApiFetcher
     public function storeMatches($date)
     {
         $teamrepo = new teamRepo();
-        $leaguerepo = new leagueRepo();
         $recordCount = 0;
         $data = $this->fetchMatchesByDate($date);
         foreach($data as $item)
         {
             $home_team = $teamrepo->getTeamByApiId($item['home']['id']);
             $away_team = $teamrepo->getTeamByApiId($item['away']['id']);
-            $league = $leaguerepo->getLeagueByApiId($item['leagueId']);
+            $league = $this->leaguerepo->getLeagueByApiId($item['leagueId']);
             $time = str_split($item['time'],11);
             if(!$home_team || !$away_team || !$league){
                 continue;
