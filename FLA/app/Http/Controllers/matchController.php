@@ -16,11 +16,15 @@ class matchController extends Controller
 
     public function  getAllMatches()
     {
-        return $this->match_repo->getAllMatches();
+        return response()->json($this->match_repo->getAll());
     }
 
     public function getMatchByApiId(int $id)
     {
-        return $this->match_repo->getMatchByApiId($id);
+        $data = $this->match_repo->getByApiId($id);
+        if (!$data) {
+            return response()->json(['message' => 'League not found'], 404);
+        }
+        return response()->json($data);
     }
 }

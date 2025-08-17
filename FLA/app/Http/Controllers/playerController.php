@@ -16,11 +16,15 @@ class playerController extends Controller
 
     public function  getAllPlayers()
     {
-        return $this->player_repo->getAllPlayers();
+        return response()->json($this->player_repo->getAll());
     }
 
     public function getPlayerByApiId(int $id)
     {
-        return $this->player_repo->getPlayerByApiId($id);
+        $data = $this->player_repo->getByApiId($id);
+        if (!$data) {
+            return response()->json(['message' => 'League not found'], 404);
+        }
+        return response()->json($data);
     }
 }

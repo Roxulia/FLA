@@ -14,6 +14,7 @@ class league_position extends Model
     protected $fillable = [
         'team_id',
         'league_id',
+        'season_id',
         'team_position',
         'played_matches',
         'wins',

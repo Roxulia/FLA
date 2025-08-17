@@ -3,6 +3,10 @@
 namespace App\Services;
 
 use App\DTO\leagueDTO;
+use App\DTO\leaguePositionDTO;
+use App\DTO\matchDTO;
+use App\DTO\playerDTO;
+use App\DTO\teamDTO;
 use App\Models\league_position;
 use Illuminate\Support\Facades\Http;
 use App\Models\Leagues;
@@ -10,7 +14,12 @@ use App\Models\Matches;
 use App\Models\Players;
 use App\Models\Teams;
 use App\Repository\leagueRepo;
+use App\Repository\leagueTableRepo;
+use App\Repository\matchRepo;
+use App\Repository\playerRepo;
 use App\Repository\teamRepo;
+use Illuminate\Support\Facades\Date;
+use Ramsey\Uuid\Type\Time;
 use SebastianBergmann\Type\NullType;
 
 class ApiFetcher
@@ -22,6 +31,10 @@ class ApiFetcher
     protected $key;
     protected $host;
     protected $leaguerepo;
+    protected $teamrepo;
+    protected $matchrepo;
+    protected $league_pos_repo;
+    protected $playerrepo;
 
     public function __construct(string $baseUrl, string $key, string $host)
     {
@@ -29,6 +42,10 @@ class ApiFetcher
         $this->key = $key;
         $this->host = $host;
         $this->leaguerepo = new leagueRepo();
+        $this->teamrepo = new teamRepo();
+        $this->matchrepo = new matchRepo();
+        $this->league_pos_repo = new leagueTableRepo();
+        $this->playerrepo = new playerRepo();
     }
 
     public function fetchLeagues()
@@ -116,40 +133,13 @@ class ApiFetcher
         $idList = $this->leaguerepo->getAllAPILeagueID();
         foreach($idList as $i){
             $data = $this->fetchTeamsByLeagueId($i);
+            $league = $this->leaguerepo->getLeagueByApiId($i);
             // Example: store data
             foreach ($data as $item) {
-                $team = Teams::updateOrCreate(
-
-                    [
-                        'team_fullname' => $item['name'],
-                        'team_shortform'=>$item['shortName'],
-                        'team_code'=>Null,
-                        'country'=>Null,
-                        'city'=>Null,
-                        'stadium_name'=>Null,
-                        'found_year'=>Null,
-                        'logo'=>$item['logo'],
-                        'id_from_api'=>$item['id'],
-                    ]
-                );
+                $team = $this->teamrepo->create(new teamDTO(0,$item['name'],$item['shortName'],null,null,null,null,null,$item['logo'],null,null,$item['id_from_api']));
                 $team_id = $team->team_id;
                 $scores = explode('-',$item['scoreStr']);
-
-                league_position::Create(
-                    [
-                        'team_id' => $team_id,
-                        'league_id' =>$i,
-                        'team_position'=>$item['idx'],
-                        'played_matches'=>$item['played'],
-                        'wins'=>$item['wins'],
-                        'losses'=>$item['losses'],
-                        'draws'=>$item['draws'],
-                        'goal_given' => $scores[1],
-                        'goal_achieved'=>$scores[0],
-                        'points' => $item['pts']
-
-                    ]
-                );
+                $this->league_pos_repo->create(new leaguePositionDTO(0,$team_id,$i,$league->current_season,$item['idx'],$item['played'],$item['wins'],$item['losses'],$item['draws'],$scores[1],$scores[0],$item['points'],null,null,null,null,null,null));
             }
             $recordCount += count($data);
         }
@@ -159,9 +149,9 @@ class ApiFetcher
 
     public function storePlayers()
     {
-        $teamrepo = new teamRepo();
+
         $recordCount = 0;
-        $idList = $teamrepo->getAllApiId();
+        $idList = $this->teamrepo->getAllApiId();
         foreach($idList as $i){
             $data = $this->fetchPlayersByTeamId($i);
             // Example: store data
@@ -173,13 +163,13 @@ class ApiFetcher
 
     public function storeMatches($date)
     {
-        $teamrepo = new teamRepo();
+
         $recordCount = 0;
         $data = $this->fetchMatchesByDate($date);
         foreach($data as $item)
         {
-            $home_team = $teamrepo->getTeamByApiId($item['home']['id']);
-            $away_team = $teamrepo->getTeamByApiId($item['away']['id']);
+            $home_team = $this->teamrepo->getByApiId($item['home']['id']);
+            $away_team = $this->teamrepo->getByApiId($item['away']['id']);
             $league = $this->leaguerepo->getLeagueByApiId($item['leagueId']);
             $time = str_split($item['time'],11);
             if(!$home_team || !$away_team || !$league){
@@ -188,17 +178,8 @@ class ApiFetcher
             $home_team_id = $home_team->team_id;
             $away_team_id = $away_team->team_id;
             $league_id = $league->league_id;
-            Matches::updateOrCreate(
-                [
-                    'home_team_id' => $home_team_id,
-                    'away_team_id' => $away_team_id,
-                    'date' => $date,
-                    'time' => $time[1],
-                    'score' => $item['status']['scoreStr'],
-                    'league_id'=>$league_id,
-                    'id_from_api'=>$item['id']
-                ]
-            );
+            $score = $item['status']['scoreStr'];
+            $this->matchrepo->create(new matchDTO(0,$home_team_id,$away_team_id,$date,$time[1],$score,null,$league_id,$item['id_from_api']));
             $recordCount++;
         }
         return $recordCount . "Saved";
@@ -212,14 +193,8 @@ class ApiFetcher
             $members = $item['members'];
             foreach($members as $m)
             {
-                Players::updateOrCreate(
-                    [
-                        'player_name' => $m['name'],
-                        'player_position' => $m['role']['fallback'],
-                        'jersey_number'=>$m['shirtNumber'],
-                        'id_from_api'=>$m['id']
-                    ]
-                );
+                $this->playerrepo->create(new playerDTO(0,$m['name'],$m['role']['fallback'],$m['shirtNumber'],$m['id']));
+
             }
             $recordLen += count($members);
         }

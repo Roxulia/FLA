@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('stadium_name',50)->nullable();
             $table->date('found_year')->nullable();
             $table->string('logo', 255)->nullable();
-            $table->boolean('is_national')->default(true);
+            $table->boolean('is_national')->default(false);
             $table->boolean('is_active')->default(true);
             $table->unsignedBigInteger('id_from_api')->nullable();
             $table->timestamps(); // created_at and updated_at

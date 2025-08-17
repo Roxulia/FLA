@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\DTO\playerDTO;
 use App\Models\Players;
 
 class playerRepo
@@ -14,18 +15,69 @@ class playerRepo
         //
     }
 
-    public function getAllPlayers()
+     public function create(playerDTO $dto): playerDTO
     {
-        return Players::all();
+        $data = Players::create(
+
+                [
+                    'player_name' => $dto -> player_name,
+                    'player_position' => $dto->player_position,
+                    'jersey_number' => $dto->jersey_number,
+                    'id_from_api'=> $dto -> id_from_api
+                ]
+            );
+
+        return playerDTO::fromModel($data);
     }
 
-    public function getAllApiId()
+    public function update(int $id, playerDTO $dto): ?playerDTO
+    {
+        $data = Players::find($id);
+        if (!$data) {
+            return null;
+        }
+
+        $data->update(
+                [
+                    'player_name' => $dto -> player_name,
+                    'player_position' => $dto->player_position,
+                    'jersey_number' => $dto->jersey_number,
+                    'id_from_api'=> $dto -> id_from_api
+                ]
+            );
+
+        return playerDTO::fromModel($data);
+    }
+
+    public function getById(int $id): ?playerDTO
+    {
+        $data = Players::find($id);
+        if (!$data) {
+            return null;
+        }
+
+        return playerDTO::fromModel($data);
+    }
+
+    public function getAll() : array
+    {
+        return Players::all()->map(function ($data) {
+            return playerDTO::fromModel($data);
+        })->toArray();
+    }
+
+    public function getAllApiId() : array
     {
         return Players::pluck('id_from_api')->toArray();
     }
 
-    public function getPlayerByApiId(int $id)
+    public function getByApiId(int $id) : ?playerDTO
     {
-        return Players::where('id_from_api','=',"{$id}")->get();
+        $data =  Players::where('id_from_api','=',"{$id}") -> get();
+        if(!$data)
+        {
+            return null;
+        }
+        return playerDTO::fromModel($data);
     }
 }
