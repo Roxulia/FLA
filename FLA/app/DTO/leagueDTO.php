@@ -5,7 +5,7 @@ namespace App\DTO;
 use App\Models\Leagues;
 use DateTime;
 
-class leagueDTO
+class leagueDTO extends baseDTO
 {
     /**
      * Create a new class instance.
@@ -69,13 +69,5 @@ class leagueDTO
         );
     }
 
-    public function __get(string $field)
-    {
-        if (property_exists($this, $field)) {
-            return $this->$field;
-        }
-
-        throw new \InvalidArgumentException("Property {$field} does not exist in " . __CLASS__);
-    }
 
 }

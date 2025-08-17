@@ -16,11 +16,15 @@ class teamController extends Controller
 
     public function  getAllTeams()
     {
-        return $this->team_repo->getAllTeams();
+        return response()->json($this->team_repo->getAll());
     }
 
     public function getTeamByApiId(int $id)
     {
-        return $this->team_repo->getTeamByApiId($id);
+        $data = $this->team_repo->getByApiId($id);
+        if (!$data) {
+            return response()->json(['message' => 'League not found'], 404);
+        }
+        return response()->json($data);
     }
 }

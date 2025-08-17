@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('team_id');
             $table->unsignedBigInteger('league_id');
+            $table->unsignedBigInteger('season_id');
             $table->smallInteger('team_position',unsigned: true)->default(0);
             $table->smallInteger('played_matches',unsigned: true)->default(0);
             $table->smallInteger('wins',unsigned: true)->default(0);
