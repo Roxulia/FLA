@@ -15,7 +15,7 @@ class playerRepo
         //
     }
 
-     public function create(playerDTO $dto): playerDTO
+    public function create(playerDTO $dto): playerDTO
     {
         $data = Players::create(
 

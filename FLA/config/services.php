@@ -41,5 +41,11 @@ return [
         'host'     => env('API_HOST'),
     ],
 
+    'live_api' => [
+        'base_url' => env('LIVE_API_BASE_URL'),
+        'key' => env('LIVE_API_KEY'),
+        'host' => env('LIVE_API_HOST'),
+    ]
+
 
 ];
