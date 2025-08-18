@@ -6,7 +6,7 @@ use App\Http\Controllers\playerController;
 use App\Http\Controllers\teamController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/fetch-store-leagues', [ApiController::class, 'testLeagueAPI']);
+Route::get('/fetch-live', [ApiController::class, 'testLiveAPI']);
 Route::get('/all-leagues', [leagueController::class, 'getAllLeagues']);
 Route::get('/leagues/{id}', [leagueController::class, 'getLeagueByApiId']);
 Route::get('/all-teams', [teamController::class, 'getAllTeams']);
