@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTO\liveDataDTO;
 use App\Repository\liveDataRepo;
 use Illuminate\Support\Facades\Http;
+use App\Utility\UltilityClass;
 
 class LiveDataFetcher
 {
@@ -43,7 +44,9 @@ class LiveDataFetcher
     public function storeLiveData()
     {
         $data = $this->fetchLive();
+        $storedLive = $this->live_data_repo->getAll();
         $record = 0;
+        $dtoDiff = UltilityClass::diffDTOs($storedLive,$data,"live_id");
         foreach($data as $item)
         {
             if($item['status'] != "Live")
@@ -54,6 +57,7 @@ class LiveDataFetcher
             {
                 $home_score = null;
                 $away_score = null;
+
 
                 if (!empty($item['score']) && strpos($item['score'], 'vs') !== false) {
                     $scores = explode('vs', $item['score']);
