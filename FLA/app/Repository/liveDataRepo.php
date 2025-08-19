@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\DTO\liveDataDTO;
+use App\Events\MatchUpdateEvent;
 use App\Models\LiveData;
 
 class liveDataRepo
@@ -37,7 +38,6 @@ class liveDataRepo
     {
 
         $data = LiveData::updateOrCreate(
-
                 [
                     'live_id' => $dto->live_id,
                     'home_name' => $dto -> home_name,
@@ -48,7 +48,7 @@ class liveDataRepo
                     'away_score' => $dto->away_score
                 ]
             );
-
+        broadcast(new MatchUpdateEvent(liveDataDTO::fromModel($data)));
         return liveDataDTO::fromModel($data);
     }
 
