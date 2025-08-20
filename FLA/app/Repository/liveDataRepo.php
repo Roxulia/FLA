@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\DTO\liveDataDTO;
 use App\Events\MatchUpdateEvent;
+use App\Events\MatchfinishedEvent;
 use App\Models\LiveData;
 
 class liveDataRepo
@@ -89,6 +90,20 @@ class liveDataRepo
         return LiveData::all()->map(function ($data) {
             return liveDataDTO::fromModel($data);
         })->toArray();
+    }
+
+    public function delete(int $id): bool
+    {
+        $data = LiveData::find($id);
+        if (!$data) {
+            return false;
+        }
+
+        $res = $data->delete();
+        if ($res) {
+            broadcast(new MatchfinishedEvent(liveDataDTO::fromModel($data))); // Broadcast null to indicate deletion
+        }
+        return $res;
     }
 
 }
