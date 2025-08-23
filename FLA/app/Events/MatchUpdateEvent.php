@@ -32,7 +32,7 @@ class MatchUpdateEvent
      */
     public function broadcastOn(): Channel
     {
-        return new Channel('Match updated.',$this->matchData);
+        return new Channel('Match-updated.',$this->matchData);
     }
 
     public function broadcastAs(): string

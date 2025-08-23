@@ -69,5 +69,22 @@ class leagueDTO extends baseDTO
         );
     }
 
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['league_id'] ?? 0,
+            $data['fullName'],
+            $data['shortForm'] ?? null,
+            $data['code'] ?? null,
+            $data['country'] ?? null,
+            $data['type'] ?? null,
+            $data['tier'] ?? null,
+            isset($data['season_start']) ? new DateTime($data['season_start']) : null,
+            isset($data['season_end']) ? new DateTime($data['season_end']) : null,
+            $data['current_season'] ?? null,
+            $data['logo'],
+            $data['id_from_api']
+        );
+    }
 
 }

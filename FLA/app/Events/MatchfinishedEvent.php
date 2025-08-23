@@ -32,7 +32,7 @@ class MatchfinishedEvent
      */
     public function broadcastOn(): Channel
     {
-        return new Channel('Match ended.',$this->matchData);
+        return new Channel('Match-ended.',$this->matchData);
     }
 
     public function broadcastAs(): string
