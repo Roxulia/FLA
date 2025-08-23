@@ -101,4 +101,13 @@ class leagueRepo
         }
         return leagueDTO::fromModel($league);
     }
+
+    public function delete(int $id): bool
+    {
+        $league = Leagues::find($id);
+        if (!$league) {
+            return false;
+        }
+        return $league->delete();
+    }
 }
