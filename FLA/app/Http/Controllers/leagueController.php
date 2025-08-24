@@ -32,13 +32,19 @@ class leagueController extends Controller
     public function createLeague(Request $request)
     {
         $request->validate([
-            'api_id' => 'required|integer|unique:leagues,api_id',
-            'name' => 'required|string|max:255',
+
+            'fullname' => 'required|string|max:255',
+            'shortform' => 'nullable|string|max:100',
+            'code' => 'nullable|string|max:50',
             'country' => 'required|string|max:255',
+            'type' => 'nullable|string|max:100',
+            'tier' => 'nullable|integer|min:1',
+            'season_start' => 'nullable|date',
+            'season_end' => 'nullable|date|after_or_equal:season_start',
+            'current_season' => 'nullable|string|max:50',
             'logo' => 'nullable|url',
-            'flag' => 'nullable|url',
-            'season_start' => 'required|date',
-            'season_end' => 'required|date|after_or_equal:season_start',
+            'is_active' => 'boolean',
+            'api_id' => 'required|integer|unique:leagues,api_id',
         ]);
 
         $league = $this->league_repo->create(leagueDTO::fromArray($request->all()));
@@ -48,10 +54,15 @@ class leagueController extends Controller
     public function updateLeague(int $id, Request $request)
     {
         $request->validate([
-            'name' => 'sometimes|required|string|max:255',
+            'fullname' => 'sometimes|required|string|max:255',
+            'shortform' => 'sometimes|nullable|string|max:100',
+            'code' => 'sometimes|nullable|string|max:50',
             'country' => 'sometimes|required|string|max:255',
+            'type' => 'sometimes|nullable|string|max:100',
+            'tier' => 'sometimes|nullable|integer|min:1',
+            'current_season' => 'sometimes|nullable|string|max:50',
+            'is_active' => 'sometimes|boolean',
             'logo' => 'sometimes|nullable|url',
-            'flag' => 'sometimes|nullable|url',
             'season_start' => 'sometimes|required|date',
             'season_end' => 'sometimes|required|date|after_or_equal:season_start',
         ]);
