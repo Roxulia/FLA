@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('home_logo',255);
             $table->string('away_name',50);
             $table->string('away_logo',255);
-            $table->int('home_score')->default(0);
-            $table->int('away_score')->default(0);
+            $table->smallInteger('home_score')->default(0);
+            $table->smallInteger('away_score')->default(0);
             $table->timestamps();
         });
     }
