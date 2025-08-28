@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\DTO\matchDTO;
 use App\Models\Matches;
+use Illuminate\Support\Facades\Cache;
 
 class matchRepo
 {
@@ -57,23 +58,32 @@ class matchRepo
 
     public function getById(int $id): ?matchDTO
     {
+        $cacheKey = "match_{$id}";
         $match = Matches::find($id);
         if (!$match) {
             return null;
         }
 
-        return matchDTO::fromModel($match);
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($match) {
+            return matchDTO::fromModel($match);
+        });
     }
 
-    public function getAll() : array
+    public function getAll(int $page = 1,int $per_page = 10)
     {
-        return Matches::all()->map(function ($match) {
-            return matchDTO::fromModel($match);
-        })->toArray();
+        $cacheKey = "matches_page_{$page}_perpage_{$per_page}";
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($per_page) {
+            $data = Matches::paginate($per_page);
+            $data -> getCollection() -> transform(function($item){
+                return matchDTO::fromModel($item);
+            });
+            return $data;
+        });
     }
 
     public function getByName(string $name) : ?matchDTO
     {
+        $cacheKey = "match_name_{$name}";
         $match =  Matches::where('name', 'LIKE', "%{$name}%")->get();
         if(!$match)
         {
@@ -81,7 +91,9 @@ class matchRepo
         }
         else
         {
-           return matchDTO::fromModel($match);
+           return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($match) {
+                return matchDTO::fromModel($match);
+            });
         }
     }
 
@@ -92,11 +104,24 @@ class matchRepo
 
     public function getByApiId(int $id) : ?matchDTO
     {
+        $cacheKey = "match_api_id_{$id}";
         $match =  Matches::where('id_from_api','=',"{$id}") -> get();
         if(!$match)
         {
             return null;
         }
-        return matchDTO::fromModel($match);
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($match) {
+            return matchDTO::fromModel($match);
+        });
+    }
+
+    public function delete(int $id): bool
+    {
+        $match = Matches::find($id);
+        if (!$match) {
+            return false;
+        }
+
+        return $match->delete();
     }
 }

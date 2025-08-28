@@ -71,4 +71,22 @@ class teamDTO extends baseDTO
         );
     }
 
+    public static function fromArray($data) : self
+    {
+        return new self(
+            $data['team_id'] ?? 0,
+            $data['name'],
+            $data['shortform'] ?? null,
+            $data['code'] ?? null,
+            $data['country'] ?? null,
+            $data['city'] ?? null,
+            $data['stadium_name'] ?? null,
+            isset($data['found_year'])? new DateTime($data['found_year']) : null,
+            $data['logo'] ?? null,
+            $data['is_national'] ?? false,
+            $data['is_active'] ?? false,
+            $data['id_from_api']
+        );
+    }
+
 }

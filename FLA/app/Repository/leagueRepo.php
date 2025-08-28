@@ -4,6 +4,9 @@ namespace App\Repository;
 
 use App\DTO\leagueDTO;
 use App\Models\Leagues;
+use Illuminate\Support\Facades\Cache;
+
+
 
 class leagueRepo
 {
@@ -60,22 +63,32 @@ class leagueRepo
 
     public function getById(int $id): ?leagueDTO
     {
+        $cacheKey = "league_{$id}";
         $league = Leagues::find($id);
         if (!$league) {
             return null;
         }
 
-        return leagueDTO::fromModel($league);
-    }
-    public function getAllLeagues() : array
-    {
-        return Leagues::all()->map(function ($league) {
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($league) {
             return leagueDTO::fromModel($league);
-        })->toArray();
+        });
+    }
+    public function getAllLeagues(int $page = 1,int $per_page = 10)
+    {
+        $cacheKey = "leagues_page_{$page}_perpage_{$per_page}";
+
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($per_page) {
+            $data = Leagues::paginate($per_page);
+            $data -> getCollection() -> transform(function($item){
+                return leagueDTO::fromModel($item);
+            });
+            return $data;
+        });
     }
 
     public function getLeaguesByName(string $name) : ?leagueDTO
     {
+        $cacheKey = "league_name_{$name}";
         $league =  Leagues::where('name', 'LIKE', "%{$name}%")->get();
         if(!$league)
         {
@@ -83,7 +96,9 @@ class leagueRepo
         }
         else
         {
-           return leagueDTO::fromModel($league);
+           return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($league) {
+                return leagueDTO::fromModel($league);
+            });
         }
     }
 
@@ -94,12 +109,15 @@ class leagueRepo
 
     public function getLeagueByApiId(int $id) : ?leagueDTO
     {
+        $cacheKey = "league_api_id_{$id}";
         $league =  Leagues::where('id_from_api','=',"{$id}") -> get();
         if(!$league)
         {
             return null;
         }
-        return leagueDTO::fromModel($league);
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($league) {
+            return leagueDTO::fromModel($league);
+        });
     }
 
     public function delete(int $id): bool
