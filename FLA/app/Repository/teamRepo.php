@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\DTO\teamDTO;
 use App\Models\Teams;
+use Illuminate\Support\Facades\Cache;
 
 class teamRepo
 {
@@ -58,31 +59,42 @@ class teamRepo
 
     public function getById(int $id): ?teamDTO
     {
-        $league = Teams::find($id);
-        if (!$league) {
+        $cacheKey = "team_id_{$id}";
+        $team = Teams::find($id);
+        if (!$team) {
             return null;
         }
 
-        return teamDTO::fromModel($league);
+        return Cache::remember($cacheKey,now()->addMinute(5), function () use($team){
+            return teamDTO::fromModel($team);
+        });
     }
 
-    public function getAll() : array
+    public function getAll(int $page,int $per_page)
     {
-        return Teams::all()->map(function ($league) {
-            return teamDTO::fromModel($league);
-        })->toArray();
+        $cacheKey = "teams_page_{$page}_perpage_{$per_page}";
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($per_page) {
+            $data = Teams::paginate($per_page);
+            $data -> getCollection() -> transform(function($item){
+                return teamDTO::fromModel($item);
+            });
+            return $data;
+        });
     }
 
     public function getByName(string $name) : ?teamDTO
     {
-        $league =  Teams::where('name', 'LIKE', "%{$name}%")->get();
-        if(!$league)
+        $cacheKey = "team_name_{$name}";
+        $team =  Teams::where('name', 'LIKE', "%{$name}%")->get();
+        if(!$team)
         {
             return null;
         }
         else
         {
-           return teamDTO::fromModel($league);
+           return Cache::remember($cacheKey,now()->addMinute(5),function() use($team){
+            return teamDTO::fromModel($team);
+           });
         }
     }
 
@@ -93,11 +105,14 @@ class teamRepo
 
     public function getByApiId(int $id) : ?teamDTO
     {
-        $league =  Teams::where('id_from_api','=',"{$id}") -> get();
-        if(!$league)
+        $cacheKey = "team_id_from_api_{$id}";
+        $team =  Teams::where('id_from_api','=',"{$id}") -> get();
+        if(!$team)
         {
             return null;
         }
-        return teamDTO::fromModel($league);
+        return Cache::remember($cacheKey,now()->addMinute(5),function () use ($team){
+            return teamDTO::fromModel($team);
+        });
     }
 }

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth.admin:admin')->group(
     function()
     {
-        Route::get('/admin-dashboard',[AdminContoller::class,'me']);
+        Route::get('/me',[AdminContoller::class,'me']);
         Route::post('/admins',[AdminContoller::class,'createAdmin'])->middleware('check_role:Admin');
         Route::get('/fetch-live', [ApiController::class, 'testLiveAPI']);
         Route::post('/leagues', [leagueController::class, 'createLeague']);

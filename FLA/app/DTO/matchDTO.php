@@ -59,4 +59,19 @@ class matchDTO extends baseDTO
         );
     }
 
+    public static function fromArray(array $data) : self
+    {
+        return new self(
+            $data['match_id'] ?? 0,
+            $data['home_team_id'],
+            $data['away_team_id'],
+            $data['date'],
+            $data['time'],
+            $data['score'] ?? '',
+            $data['status'] ?? null,
+            $data['league_id'],
+            $data['id_from_api']
+        );
+    }
+
 }
