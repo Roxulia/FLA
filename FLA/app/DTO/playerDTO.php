@@ -40,4 +40,15 @@ class playerDTO extends baseDTO
         );
     }
 
+    public static function  fromArray(array $data) : self
+    {
+        return new self(
+            $data['id'] ?? 0,
+            $data['name'],
+            $data['position'] ?? null,
+            $data['jersey_number'] ?? null,
+            $data['id_from_api'] ?? null
+        );
+    }
+
 }

@@ -70,13 +70,13 @@ class leagueController extends Controller
                 'current_season' => 'nullable|string|max:50',
                 'logo' => 'nullable|url',
                 'is_active' => 'boolean',
-                'api_id' => 'required|integer|unique:leagues,api_id',
+                'id_from_api' => 'required|integer|unique:leagues,id_from_api',
             ]);
         }catch (\Exception $e)
         {
             return response()->json(['message' => 'Validation error', 'error' => $e->getMessage()], 422);
         }
-        $existingLeague = $this->league_repo->getLeagueByApiId($request->input('api_id'));
+        $existingLeague = $this->league_repo->getLeagueByApiId($request->input('id_from_api'));
         if ($existingLeague) {
             return response()->json(['message' => 'League with this API ID already exists'], 409);
         }

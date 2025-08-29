@@ -115,4 +115,14 @@ class teamRepo
             return teamDTO::fromModel($team);
         });
     }
+
+    public function delete(int $id) : bool
+    {
+        $team = Teams::find($id);
+        if(!$team)
+        {
+            return false;
+        }
+        return $team->delete();
+    }
 }
