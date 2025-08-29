@@ -51,6 +51,7 @@ class playerRepo
 
     public function getById(int $id): ?playerDTO
     {
+        $cachKey = "player_id_{$id}";
         $data = Players::find($id);
         if (!$data) {
             return null;

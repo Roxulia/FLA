@@ -6,6 +6,7 @@ use App\Http\Controllers\leagueController;
 use App\Http\Controllers\leaguePositionController;
 use App\Http\Controllers\playerController;
 use App\Http\Controllers\teamController;
+use App\Http\Controllers\matchController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth.admin:admin')->group(
@@ -17,6 +18,12 @@ Route::middleware('auth.admin:admin')->group(
         Route::post('/leagues', [leagueController::class, 'createLeague']);
         Route::put('/leagues/{id}', [leagueController::class, 'updateLeague']);
         Route::delete('/leagues/{id}', [leagueController::class, 'deleteLeague']);
+        Route::post('/teams', [teamController::class, 'createTeam']);
+        Route::put('/teams/{id}', [teamController::class, 'updateTeam']);
+        Route::delete('/teams/{id}', [teamController::class, 'deleteTeam']);
+        Route::post('/matches', [matchController::class, 'createMatch']);
+        Route::put('/matches/{id}', [matchController::class, 'updateMatch']);
+        Route::delete('/matches/{id}', [matchController::class, 'deleteMatch']);
     }
 );
 
@@ -29,3 +36,5 @@ Route::get('/all-teams', [teamController::class, 'getAllTeams']);
 Route::get('/teams/{id}', [teamController::class, 'getTeamByApiId']);
 Route::get('/all-players', [playerController::class, 'getAllPlayers']);
 Route::get('/players/{id}', [playerController::class, 'getPlayerByApiId']);
+Route::get('/all-matches', [matchController::class, 'getAllMatches']);
+Route::get('/matches/{id}', [matchController::class, 'getMatchByApiId']);

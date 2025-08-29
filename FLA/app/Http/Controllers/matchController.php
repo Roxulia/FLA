@@ -48,6 +48,39 @@ class matchController extends Controller
         }
     }
 
+    public function updateMatch(int $id,Request $request)
+    {
+        try
+        {
+            try
+            {
+                $request->validate([
+                    'home_team_id' => 'sometimes|required|integer',
+                    'away_team_id' => 'sometimes|required|integer',
+                    'date' => 'sometimes|required|date',
+                    'time' => 'sometimes|required',
+                    'score' => 'sometimes|nullable|string',
+                    'league_id' => 'sometimes|required|integer',
+                    'id_from_api' => 'sometimes|required|integer'
+                ]);
+            }
+            catch (\Illuminate\Validation\ValidationException $e)
+            {
+                return response()->json(['message' => 'Validation Error', 'errors' => $e->errors()], 422);
+            }
+            $existingMatch = $this->match_repo->getById($id);
+            if ($existingMatch == null) {
+                return response()->json(['message' => 'Match not Found'], 404);
+            }
+            $match = $this->match_repo->update($id,matchDTO::fromArray($request->all()));
+            return response()->json(['message' => 'Match updated successfully', 'data' => $match], 200);
+        }
+        catch (\Exception $e)
+        {
+            return response()->json(['message' => 'An error occurred', 'error' => $e->getMessage()], 500);
+        }
+    }
+
     public function deleteMatch(int $id)
     {
         try
