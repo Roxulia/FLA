@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\DTO\playerDTO;
 use App\Models\Players;
+use Illuminate\Support\Facades\Cache;
 
 class playerRepo
 {
@@ -57,14 +58,23 @@ class playerRepo
             return null;
         }
 
-        return playerDTO::fromModel($data);
+        return Cache::remember($cachKey,now()->addMinute(5),function()use($data)
+        {
+            return playerDTO::fromModel($data);
+        });
     }
 
-    public function getAll() : array
+    public function getAll(int $page = 1,int $per_page = 10)
     {
-        return Players::all()->map(function ($data) {
-            return playerDTO::fromModel($data);
-        })->toArray();
+        $cachKey = "player_page_{$page}_per_page_{$per_page}";
+        return Cache::remember($cachKey,now()->addMinute(5),function()use($per_page){
+            $data = Players::paginate($per_page);
+            $data -> getCollection()->transform(function($item){
+                return playerDTO::fromModel($item);
+            });
+            return $data;
+        });
+
     }
 
     public function getAllApiId() : array
@@ -74,11 +84,25 @@ class playerRepo
 
     public function getByApiId(int $id) : ?playerDTO
     {
+        $cachKey = "player_id_from_api_{$id}";
         $data =  Players::where('id_from_api','=',"{$id}") -> get();
+
         if(!$data)
         {
             return null;
         }
-        return playerDTO::fromModel($data);
+        return Cache::remember($cachKey,now()->addMinute(5),function()use($data){
+            return playerDTO::fromModel($data);
+        });
+    }
+
+    public function delete(int $id)
+    {
+        $data = Players::find($id);
+        if(!$data)
+        {
+            return false;
+        }
+        return $data->delete();
     }
 }

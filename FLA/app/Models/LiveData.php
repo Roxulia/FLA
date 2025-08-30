@@ -15,6 +15,7 @@ class LiveData extends Model
         'away_name',
         'away_logo',
         'home_score',
-        'away_score'
+        'away_score',
+        'video_link',
     ];
 }

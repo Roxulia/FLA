@@ -6,6 +6,7 @@ use App\DTO\liveDataDTO;
 use App\Events\MatchUpdateEvent;
 use App\Events\MatchfinishedEvent;
 use App\Models\LiveData;
+use Illuminate\Support\Facades\Cache;
 
 class liveDataRepo
 {
@@ -77,19 +78,44 @@ class liveDataRepo
 
     public function getById(int $id): ?liveDataDTO
     {
+        $cacheKey = "live_id_{$id}";
         $data = LiveData::find($id);
         if (!$data) {
             return null;
         }
 
-        return liveDataDTO::fromModel($data);
+        return Cache::remember($cacheKey,now()->addMinute(5),function()use($data){
+            return liveDataDTO::fromModel($data);
+        });
+    }
+
+    public function getAllUsingPagination(int $page,int $per_page) : array
+    {
+        $cacheKey = "live_page_{$page}_per_page_{$per_page}";
+
+        return Cache::remember($cacheKey,now()->addMinute(5),function() use($per_page)
+        {
+            $data = LiveData::paginate($per_page);
+            $data->getCollection()->transform(function ($item)
+            {
+                return liveDataDTO::fromModel($item);
+            });
+            return $data;
+        });
     }
 
     public function getAll() : array
     {
-        return LiveData::all()->map(function ($data) {
-            return liveDataDTO::fromModel($data);
-        })->toArray();
+        $cacheKey = "live_all";
+        $data = LiveData::all();
+        return Cache::remember($cacheKey,now()->addMinute(5),function() use($data)
+        {
+            $data->getCollection()->transform(function ($item)
+            {
+                return liveDataDTO::fromModel($item);
+            });
+            return $data;
+        });
     }
 
     public function delete(int $id): bool

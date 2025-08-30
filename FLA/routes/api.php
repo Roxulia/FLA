@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminContoller;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\leagueController;
 use App\Http\Controllers\leaguePositionController;
+use App\Http\Controllers\liveController;
 use App\Http\Controllers\playerController;
 use App\Http\Controllers\teamController;
 use App\Http\Controllers\matchController;
@@ -14,7 +15,7 @@ Route::middleware('auth.admin:admin')->group(
     {
         Route::get('/me',[AdminContoller::class,'me']);
         Route::post('/admins',[AdminContoller::class,'createAdmin'])->middleware('check_role:Admin');
-        Route::get('/fetch-live', [ApiController::class, 'testLiveAPI']);
+        Route::get('/test-live', [ApiController::class, 'testLiveAPI']);
         Route::post('/leagues', [leagueController::class, 'createLeague']);
         Route::put('/leagues/{id}', [leagueController::class, 'updateLeague']);
         Route::delete('/leagues/{id}', [leagueController::class, 'deleteLeague']);
@@ -24,6 +25,9 @@ Route::middleware('auth.admin:admin')->group(
         Route::post('/matches', [matchController::class, 'createMatch']);
         Route::put('/matches/{id}', [matchController::class, 'updateMatch']);
         Route::delete('/matches/{id}', [matchController::class, 'deleteMatch']);
+        Route::post('/players', [playerController::class, 'createPlayer']);
+        Route::put('/players/{id}', [playerController::class, 'updatePlayer']);
+        Route::delete('/players/{id}', [playerController::class, 'deletePlayer']);
     }
 );
 
@@ -38,3 +42,4 @@ Route::get('/all-players', [playerController::class, 'getAllPlayers']);
 Route::get('/players/{id}', [playerController::class, 'getPlayerByApiId']);
 Route::get('/all-matches', [matchController::class, 'getAllMatches']);
 Route::get('/matches/{id}', [matchController::class, 'getMatchByApiId']);
+Route::get('/live-matches',[liveController::class,'getAllLives']);
