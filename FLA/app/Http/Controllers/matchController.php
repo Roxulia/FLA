@@ -5,14 +5,17 @@ namespace App\Http\Controllers;
 use App\Repository\matchRepo;
 use Illuminate\Http\Request;
 use App\DTO\matchDTO;
+use App\Repository\teamRepo;
 
 class matchController extends Controller
 {
     private matchRepo $match_repo;
+    private teamRepo $team_repo;
 
-    public function __construct(matchRepo $repo)
+    public function __construct(matchRepo $repo,teamRepo $team_repo)
     {
         $this->match_repo = $repo;
+        $this->team_repo = $team_repo;
     }
 
     public function createMatch(Request $request)
@@ -38,6 +41,11 @@ class matchController extends Controller
             $existingMatch = $this->match_repo->getByApiId($request->input('id_from_api'));
             if ($existingMatch) {
                 return response()->json(['message' => 'Match with the same API ID already exists'], 409);
+            }
+            $check = $this->checkTeamsExist($request->input('home_team_id'),$request->input('away_team_id'));
+            if($check['status'] == false)
+            {
+                return response()->json(['message'=>$check['message']],404);
             }
             $match = $this->match_repo->create(matchDTO::fromArray($request->all()));
             return response()->json(['message' => 'Match created successfully', 'data' => $match], 201);
@@ -68,9 +76,19 @@ class matchController extends Controller
             {
                 return response()->json(['message' => 'Validation Error', 'errors' => $e->errors()], 422);
             }
-            $existingMatch = $this->match_repo->getById($id);
-            if ($existingMatch == null) {
+            $existingMatchByID = $this->match_repo->getById($id);
+            $existingMatchByAPI = $this->match_repo->getByApiId($request->input('id_from_api'));
+            if($existingMatchByAPI->id != $existingMatchByID->id)
+            {
+                return response()->json(['message'=> 'Match with same API ID existed'],409);
+            }
+            if ($existingMatchByID == null) {
                 return response()->json(['message' => 'Match not Found'], 404);
+            }
+            $check = $this->checkTeamsExist($request->input('home_team_id'),$request->input('away_team_id'));
+            if($check['status'] == false)
+            {
+                return response()->json(['message'=>$check['message']],404);
             }
             $match = $this->match_repo->update($id,matchDTO::fromArray($request->all()));
             return response()->json(['message' => 'Match updated successfully', 'data' => $match], 200);
@@ -128,7 +146,7 @@ class matchController extends Controller
         try{
             $data = $this->match_repo->getById($id);
             if (!$data) {
-                return response()->json(['message' => 'League not found'], 404);
+                return response()->json(['message' => 'Player not found'], 404);
             }
             return response()->json($data);
         }
@@ -152,5 +170,20 @@ class matchController extends Controller
         {
             return response()->json(['message' => 'An error occurred', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    private function checkTeamsExist(int $home_id,int $away_id)
+    {
+        $home_team = $this->team_repo->getById($home_id);
+        $away_team = $this->team_repo->getById($away_id);
+        if($home_team == null)
+        {
+            return ['message'=> 'Home Team not Found',"status" => false];
+        }
+        if($away_team == null)
+        {
+            return ['message'=>'Away Team Not Found',"status" => false];
+        }
+        return ["status"=>true];
     }
 }

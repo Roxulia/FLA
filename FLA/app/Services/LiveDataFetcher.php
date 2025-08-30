@@ -61,7 +61,8 @@ class LiveDataFetcher
                     $home_score = isset($scores[0]) ? (int) trim($scores[0]) : 0;
                     $away_score = isset($scores[1]) ? (int) trim($scores[1]) : 0;
                 }
-                $this->live_data_repo->store(new liveDataDTO(0,$item['id'],$item['home_name'],$item['home_flag'],$item['away_name'],$item['away_flag'],$home_score,$away_score));
+                //Add Live video link here
+                $this->live_data_repo->store(new liveDataDTO(0,$item['id'],$item['home_name'],$item['home_flag'],$item['away_name'],$item['away_flag'],$home_score,$away_score,null));
                 $record++;
 
             }

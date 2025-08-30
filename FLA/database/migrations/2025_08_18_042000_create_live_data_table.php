@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('away_logo',255);
             $table->smallInteger('home_score')->default(0);
             $table->smallInteger('away_score')->default(0);
+            $table->string('video_link')->nullable();
             $table->timestamps();
         });
     }

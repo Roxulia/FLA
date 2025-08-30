@@ -77,8 +77,8 @@ class teamController extends Controller
             {
                 return response()->json(['message' => 'Validation Error', 'errors' => $e->errors()], 422);
             }
-            $existingMatch = $this->team_repo->getById($id);
-            if ($existingMatch == null) {
+            $existingTeamByID = $this->team_repo->getById($id);
+            if ($existingTeamByID == null) {
                 return response()->json(['message' => 'Team not Found'], 404);
             }
             $match = $this->team_repo->update($id,teamDTO::fromArray($request->all()));

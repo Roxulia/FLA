@@ -17,6 +17,7 @@ class liveDataDTO extends baseDTO
     private string $away_logo;
     private int $home_score;
     private int $away_score;
+    private string $video_link;
     public function __construct(
         int $id,
         int $live_id,
@@ -25,7 +26,8 @@ class liveDataDTO extends baseDTO
         string $away_name,
         string $away_logo,
         int $home_score,
-        int $away_score
+        int $away_score,
+        ?string $video_link
     )
     {
         $this->id = $id;
@@ -36,6 +38,7 @@ class liveDataDTO extends baseDTO
         $this->away_logo = $away_logo;
         $this->away_name = $away_name;
         $this->away_score = $away_score;
+        $this->video_link = $video_link;
     }
 
     public static function fromModel(LiveData $model)
@@ -48,7 +51,8 @@ class liveDataDTO extends baseDTO
             $model->away_name,
             $model->away_logo,
             $model->home_score,
-            $model->away_score
+            $model->away_score,
+            $model->video_link
         );
     }
 }
