@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\DTO\playerDTO;
+use App\Enum\playerPosition;
 use App\Models\Players;
 use Illuminate\Support\Facades\Cache;
 
@@ -22,7 +23,7 @@ class playerRepo
 
                 [
                     'player_name' => $dto -> player_name,
-                    'player_position' => $dto->player_position,
+                    'player_position' => playerPosition::from($dto->player_position),
                     'jersey_number' => $dto->jersey_number,
                     'id_from_api'=> $dto -> id_from_api
                 ]
@@ -41,7 +42,7 @@ class playerRepo
         $data->update(
                 [
                     'player_name' => $dto -> player_name,
-                    'player_position' => $dto->player_position,
+                    'player_position' => playerPosition::from($dto->player_position),
                     'jersey_number' => $dto->jersey_number,
                     'id_from_api'=> $dto -> id_from_api
                 ]

@@ -30,13 +30,28 @@ class LiveDataFetcher
         $response = Http::withHeaders([
             'x-rapidapi-host' => $this->host,
             'x-rapidapi-key'  => $this->key,
-        ])->get("{$this->baseUrl}");
+        ])->get("{$this->baseUrl}/all-match");
 
         if ($response->failed()) {
             throw new \Exception('Failed to fetch live data.');
         }
         $json = $response->json(); // Decode response to array
         $live = $json['result'] ?? []; // Safely get leagues or empty array
+
+        return $live;
+    }
+
+    public function  fetchLink($id) : string {
+        $response = Http::withHeaders([
+            'x-rapidapi-host' => $this->host,
+            'x-rapidapi-key'  => $this->key,
+        ])->get("{$this->baseUrl}/link/{$id}");
+
+        if ($response->failed()) {
+            throw new \Exception('Failed to fetch live data.');
+        }
+        $json = $response->json(); // Decode response to array
+        $live = $json['url'] ?? null; // Safely get leagues or empty array
 
         return $live;
     }
@@ -61,8 +76,8 @@ class LiveDataFetcher
                     $home_score = isset($scores[0]) ? (int) trim($scores[0]) : 0;
                     $away_score = isset($scores[1]) ? (int) trim($scores[1]) : 0;
                 }
-                //Add Live video link here
-                $this->live_data_repo->store(new liveDataDTO(0,$item['id'],$item['home_name'],$item['home_flag'],$item['away_name'],$item['away_flag'],$home_score,$away_score,null));
+                $link = $this->fetchLink($item['id']);
+                $this->live_data_repo->store(new liveDataDTO(0,$item['id'],$item['home_name'],$item['home_flag'],$item['away_name'],$item['away_flag'],$home_score,$away_score,$link));
                 $record++;
 
             }

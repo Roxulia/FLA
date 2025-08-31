@@ -5,17 +5,21 @@ namespace App\Http\Controllers;
 use App\Repository\matchRepo;
 use Illuminate\Http\Request;
 use App\DTO\matchDTO;
+use App\Enum\matchStatus;
+use App\Repository\leagueRepo;
 use App\Repository\teamRepo;
 
 class matchController extends Controller
 {
     private matchRepo $match_repo;
     private teamRepo $team_repo;
+    private leagueRepo $league_repo;
 
-    public function __construct(matchRepo $repo,teamRepo $team_repo)
+    public function __construct(matchRepo $repo,teamRepo $team_repo,leagueRepo $league_repo)
     {
         $this->match_repo = $repo;
         $this->team_repo = $team_repo;
+        $this->league_repo = $league_repo;
     }
 
     public function createMatch(Request $request)
@@ -30,6 +34,7 @@ class matchController extends Controller
                     'date' => 'required|date',
                     'time' => 'required',
                     'score' => 'nullable|string',
+                    'status' => 'nullable|string',
                     'league_id' => 'required|integer',
                     'id_from_api' => 'required|integer'
                 ]);
@@ -38,8 +43,13 @@ class matchController extends Controller
             {
                 return response()->json(['message' => 'Validation Error', 'errors' => $e->errors()], 422);
             }
+            $league = $this->league_repo->getById($request->input('league_id'));
+            if($league == null)
+            {
+                return response()->json(['message'=>'League not found'],404);
+            }
             $existingMatch = $this->match_repo->getByApiId($request->input('id_from_api'));
-            if ($existingMatch) {
+            if ($existingMatch != null) {
                 return response()->json(['message' => 'Match with the same API ID already exists'], 409);
             }
             $check = $this->checkTeamsExist($request->input('home_team_id'),$request->input('away_team_id'));
@@ -68,6 +78,7 @@ class matchController extends Controller
                     'date' => 'sometimes|required|date',
                     'time' => 'sometimes|required',
                     'score' => 'sometimes|nullable|string',
+                    'status' => 'sometimes|nullable|string',
                     'league_id' => 'sometimes|required|integer',
                     'id_from_api' => 'sometimes|required|integer'
                 ]);
@@ -75,6 +86,11 @@ class matchController extends Controller
             catch (\Illuminate\Validation\ValidationException $e)
             {
                 return response()->json(['message' => 'Validation Error', 'errors' => $e->errors()], 422);
+            }
+            $league = $this->league_repo->getById($request->input('league_id'));
+            if($league == null)
+            {
+                return response()->json(['message'=>'League not found'],404);
             }
             $existingMatchByID = $this->match_repo->getById($id);
             $existingMatchByAPI = $this->match_repo->getByApiId($request->input('id_from_api'));
@@ -96,6 +112,19 @@ class matchController extends Controller
         catch (\Exception $e)
         {
             return response()->json(['message' => 'An error occurred', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getMatchStatusValue()
+    {
+        try
+        {
+            $data = array_column(matchStatus::cases(),'value');
+            return response()->json(['message'=>"Match Status fetch successfully",'data'=>$data],200);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['message'=>"An error occurred",'error'=>$e->getMessage()],500);
         }
     }
 

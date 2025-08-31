@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\DTO\matchDTO;
+use App\Enum\matchStatus;
 use App\Models\Matches;
 use Illuminate\Support\Facades\Cache;
 
@@ -26,6 +27,7 @@ class matchRepo
                     'date' => $dto -> date,
                     'time' => $dto -> time,
                     'score' => $dto -> score,
+                    'status' => matchStatus::from($dto -> status),
                     'league_id'=>$dto -> league_id,
                     'id_from_api'=>$dto -> id_from_api
                 ]
@@ -48,6 +50,7 @@ class matchRepo
                     'date' => $dto -> date,
                     'time' => $dto -> time,
                     'score' => $dto -> score,
+                    'status' => matchStatus::from($dto->status),
                     'league_id'=>$dto -> league_id,
                     'id_from_api'=>$dto -> id_from_api
                 ]

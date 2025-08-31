@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->string('score', 10)->nullable();
 
-            $table->enum('status', ['scheduled', 'live', 'finished', 'postponed', 'cancelled']);
+            $table->enum('status', ['scheduled', 'live', 'finished', 'postponed', 'cancelled'])->default('scheduled');
 
             $table->unsignedBigInteger('league_id');
             $table->unsignedBigInteger('id_from_api')->nullable();
