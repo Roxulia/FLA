@@ -2,8 +2,10 @@
 
 namespace App\Repository;
 
+use App\DTO\leagueDTO;
 use App\DTO\leaguePositionDTO;
 use App\Models\league_position;
+use Illuminate\Support\Facades\Cache;
 
 class leagueTableRepo
 {
@@ -30,7 +32,12 @@ class leagueTableRepo
                     'draws'=>$dto->draws,
                     'goal_given' => $dto->goal_given,
                     'goal_achieved'=>$dto->goal_achieved,
-                    'points' => $dto->points
+                    'points' => $dto->points,
+                    'home_win'=> $dto->home_win,
+                    'away_win' => $dto->away_win,
+                    'streak_type' => $dto->streak_type,
+                    'streak_count' => $dto->streak_count,
+                    'next_match_id' => $dto->next_match_id
                 ]
             );
 
@@ -70,23 +77,34 @@ class leagueTableRepo
 
     public function getById(int $id): ?leaguePositionDTO
     {
+        $cacheKey = "league_positon_id_{$id}";
         $data = league_position::find($id);
         if (!$data) {
             return null;
         }
 
-        return leaguePositionDTO::fromModel($data);
+        return Cache::remember($cacheKey,now()->addMinute(5),function () use($data)
+        {
+            return leaguePositionDTO::fromModel($data);
+        });
     }
 
-    public function getAll() : array
+    public function getAll(int $page,int $per_page) : array
     {
-        return league_position::all()->map(function ($data) {
-            return leaguePositionDTO::fromModel($data);
-        })->toArray();
+        $cacheKey = "league_position_page_{$page}_per_page_{$per_page}";
+        return Cache::remember($cacheKey, now()->addMinute(5), function () use($per_page) {
+            $data = league_position::paginate($per_page);
+            $data -> getCollection()->transform(function($item)
+            {
+                return leaguePositionDTO::fromModel($item);
+            });
+            return $data;
+        });
     }
 
     public function getTeamPosInLeague(int $team_id,int $league_id,int $season_id) : ?leaguePositionDTO
     {
+        $cacheKey = "league_position_team_{$team_id}_league_{$league_id}_season_{$season_id}";
         $data = league_position::where('team_id', $team_id)
                                 ->where('league_id', $league_id)
                                 ->where('season_id',$season_id)
@@ -95,16 +113,36 @@ class leagueTableRepo
         {
             return null;
         }
-        return leaguePositionDTO::fromModel($data);
+        return Cache::remember($cacheKey,now()->addMinute(5),function ()use($data){
+            return leaguePositionDTO::fromModel($data);
+        });
     }
 
     public function getLeagueTable(int $league_id,int $season_id) : array
     {
-        return league_position::where('league_id', $league_id)
+        $cacheKey = "league_position_league_{$league_id}_season_{$season_id}";
+        return Cache::remember($cacheKey,now()->addMinute(5),function () use($league_id,$season_id) {
+            $data = league_position::where('league_id', $league_id)
                                 ->where('season_id',$season_id)
                                 ->map(function ($data) {
             return leaguePositionDTO::fromModel($data);
         })->toArray();
+
+        });
+    }
+
+    public function getAllByLeague(int $league_id)
+    {
+        $cacheKey = "league_position_league_{$league_id}";
+        return Cache::remember($cacheKey,now()->addMinute(5),function () use($league_id){
+            $data = league_position::where('league_id',$league_id)
+                                    ->groupBy('season_id')
+                                    ->get();
+            $data->getCollection()->transform(function ($item){
+                leaguePositionDTO::fromModel($item);
+            });
+            return $data;
+        });
     }
 
 }

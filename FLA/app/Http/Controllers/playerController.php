@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\DTO\playerDTO;
+use App\Enum\playerPosition;
 use App\Repository\playerRepo;
+use Exception;
 use Illuminate\Http\Request;
 
 class playerController extends Controller
@@ -130,6 +132,19 @@ class playerController extends Controller
         catch (\Exception $e)
         {
             return response()->json(['message' => 'An error occurred', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getPlayerPositionValues()
+    {
+        try
+        {
+            $data = array_column(playerPosition::cases(),'value');
+            return response()->json(['message'=>"Player Positions fetch successfully",'data'=>$data],200);
+        }
+        catch(Exception $e)
+        {
+            return response()->json(['message'=>"An error occurred",'error'=>$e->getMessage()],500);
         }
     }
 

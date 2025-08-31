@@ -34,7 +34,9 @@ Route::middleware('auth.admin:admin')->group(
 Route::get('/admin/login',[AdminContoller::class,'login']);
 Route::get('/all-leagues', [leagueController::class, 'getAllLeagues']);
 Route::get('/leagues/{id}', [leagueController::class, 'getLeagueByApiId']);
-Route::get('/league-table/{league_id}/{season_id}', [leaguePositionController::class, 'getLeagueTable']);
+Route::get('/league-table',[leaguePositionController::class,'getAllTables']);
+Route::get('/league-table/{league_id}',[leaguePositionController::class,'getAllByLeague']);
+Route::get('/league-table/{league_id}/{season_id}', [leaguePositionController::class, 'getLeagueTableBySeason']);
 Route::get('/team-position/{team_id}/{league_id}/{season_id}', [leaguePositionController::class, 'getTeamPosInLeague']);
 Route::get('/all-teams', [teamController::class, 'getAllTeams']);
 Route::get('/teams/{id}', [teamController::class, 'getTeamByApiId']);

@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('code', 10)->nullable(); // Optional
             $table->string('country', 20)->nullable(); // Optional
 
-            $table->enum('type', ['domestic', 'international'])->nullable(); // Adjust options
-            $table->enum('tier', ['first', 'second', 'third'])->nullable(); // Adjust options
+            $table->string('type')->nullable();
+            $table->string('tier')->nullable();
 
             $table->date('season_start')->nullable();
             $table->date('season_end')->nullable();

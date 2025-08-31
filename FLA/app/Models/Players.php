@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\playerPosition;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -19,7 +20,8 @@ class Players extends Model
     ];
 
     protected $casts = [
-        'jersey_number' => 'integer'
+        'jersey_number' => 'integer',
+        'player_position' => playerPosition::class
     ];
 
     public function matches()
