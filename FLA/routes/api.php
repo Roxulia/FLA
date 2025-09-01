@@ -30,18 +30,29 @@ Route::middleware('auth.admin:admin')->group(
         Route::delete('/players/{id}', [playerController::class, 'deletePlayer']);
     }
 );
+Route::middleware('throttle:admin-login')->group(
+    function(){
+        Route::get('/admin/login',[AdminContoller::class,'login']);
+    }
+);
 
-Route::get('/admin/login',[AdminContoller::class,'login']);
-Route::get('/all-leagues', [leagueController::class, 'getAllLeagues']);
-Route::get('/leagues/{id}', [leagueController::class, 'getLeagueByApiId']);
-Route::get('/league-table',[leaguePositionController::class,'getAllTables']);
-Route::get('/league-table/{league_id}',[leaguePositionController::class,'getAllByLeague']);
-Route::get('/league-table/{league_id}/{season_id}', [leaguePositionController::class, 'getLeagueTableBySeason']);
-Route::get('/team-position/{team_id}/{league_id}/{season_id}', [leaguePositionController::class, 'getTeamPosInLeague']);
-Route::get('/all-teams', [teamController::class, 'getAllTeams']);
-Route::get('/teams/{id}', [teamController::class, 'getTeamByApiId']);
-Route::get('/all-players', [playerController::class, 'getAllPlayers']);
-Route::get('/players/{id}', [playerController::class, 'getPlayerByApiId']);
-Route::get('/all-matches', [matchController::class, 'getAllMatches']);
-Route::get('/matches/{id}', [matchController::class, 'getMatchByApiId']);
-Route::get('/live-matches',[liveController::class,'getAllLives']);
+Route::middleware('throttle:ip')->group(
+    function()
+    {
+        Route::get('/all-leagues', [leagueController::class, 'getAllLeagues']);
+        Route::get('/leagues/{id}', [leagueController::class, 'getLeagueByApiId']);
+        Route::get('/league-table',[leaguePositionController::class,'getAllTables']);
+        Route::get('/league-table/{league_id}',[leaguePositionController::class,'getAllByLeague']);
+        Route::get('/league-table/{league_id}/{season_id}', [leaguePositionController::class, 'getLeagueTableBySeason']);
+        Route::get('/team-position/{team_id}/{league_id}/{season_id}', [leaguePositionController::class, 'getTeamPosInLeague']);
+        Route::get('/all-teams', [teamController::class, 'getAllTeams']);
+        Route::get('/teams/{id}', [teamController::class, 'getTeamByApiId']);
+        Route::get('/all-players', [playerController::class, 'getAllPlayers']);
+        Route::get('/players/{id}', [playerController::class, 'getPlayerByApiId']);
+        Route::get('/all-matches', [matchController::class, 'getAllMatches']);
+        Route::get('/matches/{id}', [matchController::class, 'getMatchByApiId']);
+        Route::get('/live-matches',[liveController::class,'getAllLives']);
+    }
+);
+
+
