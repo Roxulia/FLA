@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\LiveData;
+use App\Repository\AdminRepo;
 use App\Repository\leagueRepo;
 use App\Repository\leagueTableRepo;
 use App\Repository\liveDataRepo;
@@ -12,6 +13,9 @@ use App\Repository\teamRepo;
 use Illuminate\Support\ServiceProvider;
 use App\Services\ApiFetcher;
 use App\Services\LiveDataFetcher;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Client\Request as Request;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -57,6 +61,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(leagueTableRepo::class,function ($app){
             return new leagueTableRepo();
         });
+        $this->app->singleton(AdminRepo::class,function($app){
+            return new AdminRepo();
+        });
 
     }
 
@@ -65,6 +72,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        RateLimiter::for('ip',function(Request $request)
+        {
+            return Limit::perMinute(60)->by($request->ip());
+        });
+
+        RateLimiter::for('admin-login',function (Request $request)
+        {
+            return Limit::perMinute(5)->by($request->ip().'|'.$request->input('email'));
+        });
     }
 }
